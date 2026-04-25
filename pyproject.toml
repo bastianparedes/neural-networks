@@ -1,35 +1,41 @@
 [project]
-name = "neural-networks"
-version = "0.1.0"
-description = "Neural networks project"
-readme = "README.md"
-requires-python = ">=3.10"
+name = 'neural-networks'
+version = '0.1.0'
+description = 'Neural networks project'
+readme = 'README.md'
+requires-python = '>=3.10'
 dependencies = [
-    "matplotlib>=3.10.9",
-    "numpy>=2.2.6",
-    "ruff>=0.15.12",
-    "taskipy>=1.14.1",
+    'matplotlib>=3.10.9',
+    'numpy>=2.2.6',
+    'ruff>=0.15.12',
+    'taskipy>=1.14.1',
 ]
-
-[project.scripts]
-start = "main:main"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = 'py310'
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = [
+    'E',   # errores estilo pycodestyle
+    'F',   # errores tipo Pyflakes
+    'I',   # imports
+    'B',   # bugs comunes (flake8-bugbear)
+    'UP',  # modernización de Python
+    'SIM', # simplificaciones
+    'C4',  # comprehensions
+    'PIE', # errores comunes varios
+]
+ignore = [
+    'E501', # longitud de línea (ya controlada por formatter)
+]
 
 [tool.ruff.format]
-quote-style = "double"
+quote-style = 'single'
+indent-style = 'space'
+line-ending = 'auto'
 
 [tool.taskipy.tasks]
-"lint" = "ruff check ."
-"lint:fix" = "ruff format ."
+'start' = 'uv run python ./src/index.py'
+'lint' = 'ruff check . --fix'
+'lint:fix' = 'ruff check . --fix && ruff format .'

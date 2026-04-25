@@ -61,28 +61,24 @@ def train():
         losses.append(loss)
 
         if i % 1000 == 0:
-            print(f"Epoch {i}, Loss: {loss:.4f}")
+            print(f'Epoch {i}, Loss: {loss:.4f}')
 
     return nn, losses, X
 
 
 def test(nn, X):
-    print("\nPredicciones finales:")
+    print('\nPredicciones finales:')
     for x in X:
         pred = nn.forward(np.array([x]))
-        print(f"{x} -> {pred[0][0]:.4f}")
+        print(f'{x} -> {pred[0][0]:.4f}')
 
 
-def main():
+if __name__ == '__main__':
     nn, losses, X = train()
     test(nn, X)
 
     plt.plot(losses)
-    plt.title("Evolución del error")
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
+    plt.title('Evolución del error')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
     plt.show()
-
-
-if __name__ == "__main__":
-    main()
