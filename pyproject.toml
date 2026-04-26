@@ -43,7 +43,6 @@ indent-style = 'space'
 line-ending = 'auto'
 
 [tool.taskipy.tasks]
-create_data = "uv run python -m src.create_data"
 start = "uv run python -m src.index"
 lint = "ruff check ."
 "lint:fix" = "ruff check . --fix && ruff format ."

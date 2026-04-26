@@ -3,12 +3,15 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+from create_data import create_data
+
 # =========================
 # 1. DATA LOADING FROM CSV
 # =========================
 
+create_data()
 try:
-    df = pd.read_csv('src/data.csv')
+    df = pd.read_csv('data.csv')
 except FileNotFoundError:
     print("Error: The file 'data.csv' was not found.")
     exit()
