@@ -1,84 +1,98 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import tensorflow as tf
 
+# =========================
+# 1. DATA LOADING FROM CSV
+# =========================
 
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+try:
+    df = pd.read_csv('src/data.csv')
+except FileNotFoundError:
+    print("Error: The file 'data.csv' was not found.")
+    exit()
 
+# Extraemos X1, X2 y Y
+# Combinamos x1 y x2 en una sola matriz de características (Features)
+X = df[['x1', 'x2']].values
+Y = df['y'].values.reshape(-1, 1)
 
-def sigmoid_derivative(x):
-    return x * (1 - x)
+# =========================
+# 2. DATA NORMALIZATION
+# =========================
 
+# Normalizamos ambas columnas de X y la de Y
+X_mean, X_std = X.mean(axis=0), X.std(axis=0)
+Y_mean, Y_std = Y.mean(), Y.std()
 
-class SimpleNN:
-    def __init__(self, input_size, hidden_size, output_size):
-        self.W1 = np.random.randn(input_size, hidden_size)
-        self.b1 = np.zeros((1, hidden_size))
+X_norm = (X - X_mean) / X_std
+Y_norm = (Y - Y_mean) / Y_std
 
-        self.W2 = np.random.randn(hidden_size, output_size)
-        self.b2 = np.zeros((1, output_size))
+# =========================
+# 3. MODEL DEFINITION
+# =========================
 
-    def forward(self, X):
-        self.z1 = np.dot(X, self.W1) + self.b1
-        self.a1 = sigmoid(self.z1)
+model = tf.keras.Sequential(
+    [
+        # Cambiamos input_shape a (2,) porque ahora entran x1 y x2
+        tf.keras.layers.Dense(16, activation='relu', input_shape=(2,)),
+        tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dense(1),
+    ]
+)
 
-        self.z2 = np.dot(self.a1, self.W2) + self.b2
-        self.a2 = sigmoid(self.z2)
+model.compile(optimizer='adam', loss='mse')
 
-        return self.a2
+# =========================
+# 4. TRAINING
+# =========================
 
-    def backward(self, X, y, output, lr):
-        error = y - output
-        d_output = error * sigmoid_derivative(output)
+print('Training the model with x1 and x2...')
+model.fit(X_norm, Y_norm, epochs=200, verbose=0)
 
-        error_hidden = d_output.dot(self.W2.T)
-        d_hidden = error_hidden * sigmoid_derivative(self.a1)
+# =========================
+# 5. PREDICTION (Visualization Grid)
+# =========================
 
-        self.W2 += self.a1.T.dot(d_output) * lr
-        self.b2 += np.sum(d_output, axis=0, keepdims=True) * lr
+# Para visualizar en 3D, creamos una malla (mesh) de puntos
+x1_range = np.linspace(X[:, 0].min(), X[:, 0].max(), 20)
+x2_range = np.linspace(X[:, 1].min(), X[:, 1].max(), 20)
+X1_mesh, X2_mesh = np.meshgrid(x1_range, x2_range)
 
-        self.W1 += X.T.dot(d_hidden) * lr
-        self.b1 += np.sum(d_hidden, axis=0, keepdims=True) * lr
+# Aplanamos la malla para pasarla por el modelo
+X_test = np.c_[X1_mesh.ravel(), X2_mesh.ravel()]
+X_test_norm = (X_test - X_mean) / X_std
 
-        return np.mean(np.abs(error))
+Y_pred_norm = model.predict(X_test_norm)
+Y_pred = Y_pred_norm * Y_std + Y_mean
+Y_pred_mesh = Y_pred.reshape(X1_mesh.shape)
 
+# =========================
+# 6. VISUALIZATION (3D)
+# =========================
 
-def train():
-    # XOR dataset
-    X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection='3d')
 
-    y = np.array([[0], [1], [1], [0]])
+# Graficamos los puntos reales
+ax.scatter(
+    X[:, 0],
+    X[:, 1],
+    Y.flatten(),
+    color='blue',
+    label='Actual Data',
+    alpha=1,
+)
 
-    nn = SimpleNN(input_size=2, hidden_size=4, output_size=1)
+# Graficamos la superficie de predicción
+surf = ax.plot_surface(
+    X1_mesh, X2_mesh, Y_pred_mesh, color='red', alpha=0.4, label='Model Prediction'
+)
 
-    losses = []
-    epochs = 10000
-    lr = 0.1
+ax.set_title('Neural Network Fit: Y = f(X1, X2)')
+ax.set_xlabel('X1 Axis')
+ax.set_ylabel('X2 Axis')
+ax.set_zlabel('Y Axis')
 
-    for i in range(epochs):
-        output = nn.forward(X)
-        loss = nn.backward(X, y, output, lr)
-        losses.append(loss)
-
-        if i % 1000 == 0:
-            print(f'Epoch {i}, Loss: {loss:.4f}')
-
-    return nn, losses, X
-
-
-def test(nn, X):
-    print('\nPredicciones finales:')
-    for x in X:
-        pred = nn.forward(np.array([x]))
-        print(f'{x} -> {pred[0][0]:.4f}')
-
-
-if __name__ == '__main__':
-    nn, losses, X = train()
-    test(nn, X)
-
-    plt.plot(losses)
-    plt.title('Evolución del error')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.show()
+plt.show()
