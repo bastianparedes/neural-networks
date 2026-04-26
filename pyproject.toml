@@ -43,6 +43,12 @@ indent-style = 'space'
 line-ending = 'auto'
 
 [tool.taskipy.tasks]
-start = "uv run python -m src.index"
+create_model_1 = "uv run python -m src.dos_a_uno.create_model"
+load_model_1 = "uv run python -m src.dos_a_uno.load_model"
+create_model_2 = "uv run python -m src.dos_a_dos.create_model"
+load_model_2 = "uv run python -m src.dos_a_dos.load_model"
+create_model_3 = "uv run python -m src.tres_a_tres.create_model"
+load_model_3 = "uv run python -m src.tres_a_tres.load_model"
+dosados = "uv run python -m src.dosados"
 lint = "ruff check ."
 "lint:fix" = "ruff check . --fix && ruff format ."
