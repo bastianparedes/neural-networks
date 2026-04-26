@@ -36,7 +36,7 @@ Y_norm = (Y - Y_mean) / Y_std
 model = tf.keras.Sequential(
     [
         # Cambiamos input_shape a (2,) porque ahora entran x1 y x2
-        tf.keras.layers.Dense(16, activation='relu', input_shape=(2,)),
+        tf.keras.layers.Dense(16, activation='linear', input_shape=(2,)),
         tf.keras.layers.Dense(16, activation='relu'),
         tf.keras.layers.Dense(1),
     ]
